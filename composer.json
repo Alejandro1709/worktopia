@@ -1,0 +1,16 @@
+{
+  "name": "alejandro1709/worktopia",
+  "description": "Job listing application",
+  "authors": [
+    {
+      "name": "Alejandro La Rosa",
+      "email": "alejandrolarosa11apps@hotmail.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Framework\\": "Framework/",
+      "App\\": "App/"
+    }
+  }
+}
