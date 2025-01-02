@@ -79,21 +79,48 @@ class Router {
     * Route the request
     *
     * @param string $uri
-    * @param string $method
     * @return void
     */
 
-    public function route($uri, $method) {
-      foreach ($this->routes as $route) {
-        if ($route['uri'] === $uri && $route['method'] === $method) {
-          // Extract controller and controller method
-          $controller = 'App\\Controllers\\' . $route['controller'];
-          $controllerMethod = $route['controllerMethod'];
+    public function route($uri) {
+      $requestMethod = $_SERVER['REQUEST_METHOD'];
 
-          // Instatiate the controller and call the method
-          $controllerInstance = new $controller();
-          $controllerInstance->$controllerMethod();
-          return;
+      foreach ($this->routes as $route) {
+        // Split the current URI into segments
+        $uriSegments = explode('/', trim($uri, '/'));
+        // Split the route URI into segments
+        $routeSegment = explode('/', trim($route['uri'], '/'));
+
+        $match = true;
+
+        // Check if the number of segments matches
+        if (count($uriSegments) === count($routeSegment) && strtoupper($route['method'] === $requestMethod)) {
+          $params = [];
+
+          $match = true;
+
+          for ($i = 0; $i < count($uriSegments); $i++) {
+            // If the uri's do not match and there is no params
+            if ($routeSegment[$i] !== $uriSegments[$i] && !preg_match('/\{(.+?)\}/', $routeSegment[$i])) {
+              $match = false;
+              break;
+            }
+
+            // Check for the param and add to $params array
+            if (preg_match('/\{(.+?)\}/', $routeSegment[$i], $matches)) {
+              $params[$matches[1]] = $uriSegments[$i];
+            }
+          }
+
+          if ($match) {
+            $controller = 'App\\Controllers\\' . $route['controller'];
+            $controllerMethod = $route['controllerMethod'];
+            
+            // Instatiate the controller and call the method
+            $controllerInstance = new $controller();
+            $controllerInstance->$controllerMethod($params);
+            return;
+          }
         }
       }
 
